@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>宝可梦名字背诵机 · 离线名称版</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#6b7280;--line:#e5e7eb;--blue:#2563eb;--orange:#fff7ed}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:900px;margin:auto;padding:14px}.top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+h1{font-size:23px;margin:3px 0}.sub{font-size:13px;color:var(--muted)}.badge{padding:7px 10px;background:#ecfdf5;color:#065f46;border-radius:99px;font-size:12px}
+.panel,.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 22px rgba(15,23,42,.06)}
+.panel{padding:12px;margin:12px 0}.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}select,input{width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 8px}
+.card{text-align:center;padding:15px;min-height:555px}.progress{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.bar{height:7px;background:#edf2f7;border-radius:99px;overflow:hidden;margin:9px 0 10px}.bar i{display:block;height:100%;background:var(--blue);width:1%}
+.num{font-weight:800;color:#475569;letter-spacing:.08em}.imgwrap{height:285px;display:flex;align-items:center;justify-content:center}
+img{max-width:300px;max-height:275px;object-fit:contain}.fallback{display:none;font-size:70px}
+.cn{font-size:38px;font-weight:900}.ja{font-size:20px;color:#475569;margin-top:2px}.hint{height:21px;font-size:13px;color:var(--muted);margin-top:4px}
+.hidden .cn,.hidden .ja{filter:blur(12px);user-select:none}
+.buttons{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}button{border:0;border-radius:12px;padding:11px 14px;font-weight:750;background:#edf2f7;color:#172033}
+button.primary{background:var(--blue);color:white}button.warn{background:var(--orange);color:#9a3412;border:1px solid #fed7aa}button.marked{background:#fffbeb;color:#92400e;border:1px solid #fcd34d}
+.status{font-size:13px;text-align:left;background:#f8fafc;color:#475569;padding:10px;border-radius:11px;margin-top:12px;line-height:1.55}
+.notice{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}
+noscript{display:block;padding:15px;background:#fef2f2;color:#991b1b;border-radius:12px;margin:12px}
+@media(max-width:650px){.controls{grid-template-columns:repeat(2,1fr)}.card{min-height:520px}.imgwrap{height:250px}img{max-height:240px}.cn{font-size:34px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><div><h1>宝可梦名字背诵机</h1><div class="sub">001–151 · 离线内置名称 · 看图 / 听名字 / 随机抽背</div></div><div class="badge">名称已内置，无需联网读取</div></div>
+<noscript>当前打开方式禁止运行网页脚本。请先把文件下载到手机/电脑，再选择 Safari、Chrome 或 Edge 打开，而不要停留在聊天内置预览。</noscript>
+<div class="panel"><div class="controls">
+<div><label>模式</label><select id="mode"><option value="follow">跟读：显示名字</option><option value="quiz">看图猜名字</option><option value="unknown">只练不会</option></select></div>
+<div><label>顺序</label><select id="order"><option value="seq">图鉴顺序</option><option value="random">随机</option></select></div>
+<div><label>朗读</label><select id="lang"><option value="zh">中文</option><option value="ja">日文</option><option value="both">中文 + 日文</option></select></div>
+<div><label>重复次数</label><select id="repeats"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option></select></div>
+<div><label>每只间隔（秒）</label><input id="delay" type="number" min="1" max="20" value="3"></div>
+<div><label>开始编号</label><input id="start" type="number" min="1" max="151" value="1"></div>
+<div><label>结束编号</label><input id="end" type="number" min="1" max="151" value="151"></div>
+<div><label>语速</label><input id="rate" type="number" min="0.5" max="1.3" step="0.05" value="0.8"></div>
+</div></div>
+
+<div class="card">
+<div class="progress"><span id="counter">1 / 151</span><span id="ucount">不会：0</span></div><div class="bar"><i id="bar"></i></div>
+<div id="box">
+<div class="num" id="dex">#001</div>
+<div class="imgwrap"><img id="pic" alt="宝可梦"><div class="fallback" id="fallback">◓</div></div>
+<div class="cn" id="cn">妙蛙种子</div><div class="ja" id="ja">フシギダネ</div><div class="hint" id="hint">点“开始连续播放”后会自动朗读</div>
+</div>
+<div class="buttons">
+<button id="prev">← 上一只</button><button class="primary" id="speak">🔊 念当前</button><button id="reveal">👁 显示答案</button><button class="warn" id="unk">☆ 这只不会</button><button id="next">下一只 →</button>
+</div>
+<div class="buttons"><button class="primary" id="play">▶ 开始连续播放</button><button id="pause">⏸ 暂停</button><button id="shuffle">🔀 随机抽背</button></div>
+<div class="status" id="status">如果你在手机上使用：第一次播放必须手动点一次“开始连续播放”，这是手机浏览器的语音权限限制，不是故障。</div>
+</div>
+<div class="notice">名称数据已写进文件本身。只有宝可梦图片需要联网；即使图片加载失败，中文名、日文名、语音和训练功能仍可继续使用。手机锁屏后浏览器可能暂停网页语音，因此突击背诵时建议保持页面亮屏。</div>
+</div>
+<script>
+const ALL=[{"id":1,"zh":"妙蛙种子","ja":"フシギダネ"},{"id":2,"zh":"妙蛙草","ja":"フシギソウ"},{"id":3,"zh":"妙蛙花","ja":"フシギバナ"},{"id":4,"zh":"小火龙","ja":"ヒトカゲ"},{"id":5,"zh":"火恐龙","ja":"リザード"},{"id":6,"zh":"喷火龙","ja":"リザードン"},{"id":7,"zh":"杰尼龟","ja":"ゼニガメ"},{"id":8,"zh":"卡咪龟","ja":"カメール"},{"id":9,"zh":"水箭龟","ja":"カメックス"},{"id":10,"zh":"绿毛虫","ja":"キャタピー"},{"id":11,"zh":"铁甲蛹","ja":"トランセル"},{"id":12,"zh":"巴大蝶","ja":"バタフリー"},{"id":13,"zh":"独角虫","ja":"ビードル"},{"id":14,"zh":"铁壳蛹","ja":"コクーン"},{"id":15,"zh":"大针蜂","ja":"スピアー"},{"id":16,"zh":"波波","ja":"ポッポ"},{"id":17,"zh":"比比鸟","ja":"ピジョン"},{"id":18,"zh":"大比鸟","ja":"ピジョット"},{"id":19,"zh":"小拉达","ja":"コラッタ"},{"id":20,"zh":"拉达","ja":"ラッタ"},{"id":21,"zh":"烈雀","ja":"オニスズメ"},{"id":22,"zh":"大嘴雀","ja":"オニドリル"},{"id":23,"zh":"阿柏蛇","ja":"アーボ"},{"id":24,"zh":"阿柏怪","ja":"アーボック"},{"id":25,"zh":"皮卡丘","ja":"ピカチュウ"},{"id":26,"zh":"雷丘","ja":"ライチュウ"},{"id":27,"zh":"穿山鼠","ja":"サンド"},{"id":28,"zh":"穿山王","ja":"サンドパン"},{"id":29,"zh":"尼多兰","ja":"ニドラン♀"},{"id":30,"zh":"尼多娜","ja":"ニドリーナ"},{"id":31,"zh":"尼多后","ja":"ニドクイン"},{"id":32,"zh":"尼多朗","ja":"ニドラン♂"},{"id":33,"zh":"尼多力诺","ja":"ニドリーノ"},{"id":34,"zh":"尼多王","ja":"ニドキング"},{"id":35,"zh":"皮皮","ja":"ピッピ"},{"id":36,"zh":"皮可西","ja":"ピクシー"},{"id":37,"zh":"六尾","ja":"ロコン"},{"id":38,"zh":"九尾","ja":"キュウコン"},{"id":39,"zh":"胖丁","ja":"プリン"},{"id":40,"zh":"胖可丁","ja":"プクリン"},{"id":41,"zh":"超音蝠","ja":"ズバット"},{"id":42,"zh":"大嘴蝠","ja":"ゴルバット"},{"id":43,"zh":"走路草","ja":"ナゾノクサ"},{"id":44,"zh":"臭臭花","ja":"クサイハナ"},{"id":45,"zh":"霸王花","ja":"ラフレシア"},{"id":46,"zh":"派拉斯","ja":"パラス"},{"id":47,"zh":"派拉斯特","ja":"パラセクト"},{"id":48,"zh":"毛球","ja":"コンパン"},{"id":49,"zh":"摩鲁蛾","ja":"モルフォン"},{"id":50,"zh":"地鼠","ja":"ディグダ"},{"id":51,"zh":"三地鼠","ja":"ダグトリオ"},{"id":52,"zh":"喵喵","ja":"ニャース"},{"id":53,"zh":"猫老大","ja":"ペルシアン"},{"id":54,"zh":"可达鸭","ja":"コダック"},{"id":55,"zh":"哥达鸭","ja":"ゴルダック"},{"id":56,"zh":"猴怪","ja":"マンキー"},{"id":57,"zh":"火暴猴","ja":"オコリザル"},{"id":58,"zh":"卡蒂狗","ja":"ガーディ"},{"id":59,"zh":"风速狗","ja":"ウインディ"},{"id":60,"zh":"蚊香蝌蚪","ja":"ニョロモ"},{"id":61,"zh":"蚊香君","ja":"ニョロゾ"},{"id":62,"zh":"蚊香泳士","ja":"ニョロボン"},{"id":63,"zh":"凯西","ja":"ケーシィ"},{"id":64,"zh":"勇基拉","ja":"ユンゲラー"},{"id":65,"zh":"胡地","ja":"フーディン"},{"id":66,"zh":"腕力","ja":"ワンリキー"},{"id":67,"zh":"豪力","ja":"ゴーリキー"},{"id":68,"zh":"怪力","ja":"カイリキー"},{"id":69,"zh":"喇叭芽","ja":"マダツボミ"},{"id":70,"zh":"口呆花","ja":"ウツドン"},{"id":71,"zh":"大食花","ja":"ウツボット"},{"id":72,"zh":"玛瑙水母","ja":"メノクラゲ"},{"id":73,"zh":"毒刺水母","ja":"ドククラゲ"},{"id":74,"zh":"小拳石","ja":"イシツブテ"},{"id":75,"zh":"隆隆石","ja":"ゴローン"},{"id":76,"zh":"隆隆岩","ja":"ゴローニャ"},{"id":77,"zh":"小火马","ja":"ポニータ"},{"id":78,"zh":"烈焰马","ja":"ギャロップ"},{"id":79,"zh":"呆呆兽","ja":"ヤドン"},{"id":80,"zh":"呆壳兽","ja":"ヤドラン"},{"id":81,"zh":"小磁怪","ja":"コイル"},{"id":82,"zh":"三合一磁怪","ja":"レアコイル"},{"id":83,"zh":"大葱鸭","ja":"カモネギ"},{"id":84,"zh":"嘟嘟","ja":"ドードー"},{"id":85,"zh":"嘟嘟利","ja":"ドードリオ"},{"id":86,"zh":"小海狮","ja":"パウワウ"},{"id":87,"zh":"白海狮","ja":"ジュゴン"},{"id":88,"zh":"臭泥","ja":"ベトベター"},{"id":89,"zh":"臭臭泥","ja":"ベトベトン"},{"id":90,"zh":"大舌贝","ja":"シェルダー"},{"id":91,"zh":"刺甲贝","ja":"パルシェン"},{"id":92,"zh":"鬼斯","ja":"ゴース"},{"id":93,"zh":"鬼斯通","ja":"ゴースト"},{"id":94,"zh":"耿鬼","ja":"ゲンガー"},{"id":95,"zh":"大岩蛇","ja":"イワーク"},{"id":96,"zh":"催眠貘","ja":"スリープ"},{"id":97,"zh":"引梦貘人","ja":"スリーパー"},{"id":98,"zh":"大钳蟹","ja":"クラブ"},{"id":99,"zh":"巨钳蟹","ja":"キングラー"},{"id":100,"zh":"霹雳电球","ja":"ビリリダマ"},{"id":101,"zh":"顽皮雷弹","ja":"マルマイン"},{"id":102,"zh":"蛋蛋","ja":"タマタマ"},{"id":103,"zh":"椰蛋树","ja":"ナッシー"},{"id":104,"zh":"卡拉卡拉","ja":"カラカラ"},{"id":105,"zh":"嘎啦嘎啦","ja":"ガラガラ"},{"id":106,"zh":"飞腿郎","ja":"サワムラー"},{"id":107,"zh":"快拳郎","ja":"エビワラー"},{"id":108,"zh":"大舌头","ja":"ベロリンガ"},{"id":109,"zh":"瓦斯弹","ja":"ドガース"},{"id":110,"zh":"双弹瓦斯","ja":"マタドガス"},{"id":111,"zh":"独角犀牛","ja":"サイホーン"},{"id":112,"zh":"钻角犀兽","ja":"サイドン"},{"id":113,"zh":"吉利蛋","ja":"ラッキー"},{"id":114,"zh":"蔓藤怪","ja":"モンジャラ"},{"id":115,"zh":"袋兽","ja":"ガルーラ"},{"id":116,"zh":"墨海马","ja":"タッツー"},{"id":117,"zh":"海刺龙","ja":"シードラ"},{"id":118,"zh":"角金鱼","ja":"トサキント"},{"id":119,"zh":"金鱼王","ja":"アズマオウ"},{"id":120,"zh":"海星星","ja":"ヒトデマン"},{"id":121,"zh":"宝石海星","ja":"スターミー"},{"id":122,"zh":"魔墙人偶","ja":"バリヤード"},{"id":123,"zh":"飞天螳螂","ja":"ストライク"},{"id":124,"zh":"迷唇姐","ja":"ルージュラ"},{"id":125,"zh":"电击兽","ja":"エレブー"},{"id":126,"zh":"鸭嘴火兽","ja":"ブーバー"},{"id":127,"zh":"凯罗斯","ja":"カイロス"},{"id":128,"zh":"肯泰罗","ja":"ケンタロス"},{"id":129,"zh":"鲤鱼王","ja":"コイキング"},{"id":130,"zh":"暴鲤龙","ja":"ギャラドス"},{"id":131,"zh":"拉普拉斯","ja":"ラプラス"},{"id":132,"zh":"百变怪","ja":"メタモン"},{"id":133,"zh":"伊布","ja":"イーブイ"},{"id":134,"zh":"水伊布","ja":"シャワーズ"},{"id":135,"zh":"雷伊布","ja":"サンダース"},{"id":136,"zh":"火伊布","ja":"ブースター"},{"id":137,"zh":"多边兽","ja":"ポリゴン"},{"id":138,"zh":"菊石兽","ja":"オムナイト"},{"id":139,"zh":"多刺菊石兽","ja":"オムスター"},{"id":140,"zh":"化石盔","ja":"カブト"},{"id":141,"zh":"镰刀盔","ja":"カブトプス"},{"id":142,"zh":"化石翼龙","ja":"プテラ"},{"id":143,"zh":"卡比兽","ja":"カビゴン"},{"id":144,"zh":"急冻鸟","ja":"フリーザー"},{"id":145,"zh":"闪电鸟","ja":"サンダー"},{"id":146,"zh":"火焰鸟","ja":"ファイヤー"},{"id":147,"zh":"迷你龙","ja":"ミニリュウ"},{"id":148,"zh":"哈克龙","ja":"ハクリュー"},{"id":149,"zh":"快龙","ja":"カイリュー"},{"id":150,"zh":"超梦","ja":"ミュウツー"},{"id":151,"zh":"梦幻","ja":"ミュウ"}];
+const IMG=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+const $=x=>document.getElementById(x);
+let unknown=new Set(JSON.parse(localStorage.getItem('poke151_unknown_offline')||'[]'));
+let q=[],pos=0,playing=false,timer=null;
+
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function build(){
+ stop();
+ let a=Math.max(1,Math.min(151,+$('start').value||1)),b=Math.max(1,Math.min(151,+$('end').value||151));if(a>b)[a,b]=[b,a];
+ q=ALL.filter(x=>x.id>=a&&x.id<=b);
+ if($('mode').value==='unknown')q=q.filter(x=>unknown.has(x.id));
+ if($('order').value==='random')q=shuffle(q);
+ pos=0;render();
+}
+function cur(){return q[pos]}
+function render(){
+ clearTimeout(timer);let x=cur();$('ucount').textContent='不会：'+unknown.size;
+ if(!x){$('cn').textContent='当前没有题目';$('ja').textContent='';$('dex').textContent='—';$('counter').textContent='0 / 0';$('bar').style.width='0';return}
+ $('dex').textContent='#'+String(x.id).padStart(3,'0');$('cn').textContent=x.zh;$('ja').textContent=x.ja;$('counter').textContent=(pos+1)+' / '+q.length;$('bar').style.width=((pos+1)/q.length*100)+'%';
+ $('pic').style.display='block';$('fallback').style.display='none';$('pic').src=IMG(x.id);$('pic').onerror=()=>{$('pic').style.display='none';$('fallback').style.display='block'};
+ let hidden=$('mode').value==='quiz';$('box').classList.toggle('hidden',hidden);$('reveal').style.display=hidden?'inline-block':'none';$('hint').textContent=hidden?'先自己说名字，再点“显示答案”':'点“开始连续播放”后会自动朗读';
+ let m=unknown.has(x.id);$('unk').textContent=m?'★ 已加入不会':'☆ 这只不会';$('unk').className=m?'marked':'warn';
+ if(playing && $('mode').value!=='quiz') setTimeout(()=>speak(true),250);
+}
+function u(text,lang){
+ return new Promise(res=>{let a=new SpeechSynthesisUtterance(text);a.lang=lang==='zh'?'zh-CN':'ja-JP';a.rate=Math.max(.5,Math.min(1.3,+$('rate').value||.8));a.onend=res;a.onerror=res;speechSynthesis.speak(a)});
+}
+async function speak(chain=false){
+ let x=cur();if(!x)return;speechSynthesis.cancel();clearTimeout(timer);
+ let r=+$('repeats').value||1,lang=$('lang').value,seq=[];
+ for(let i=0;i<r;i++){if(lang==='zh'||lang==='both')seq.push([x.zh,'zh']);if(lang==='ja'||lang==='both')seq.push([x.ja,'ja'])}
+ for(const [t,l] of seq){await u(t,l);await new Promise(z=>setTimeout(z,180))}
+ if(chain&&playing)timer=setTimeout(()=>next(true),Math.max(1000,(+$('delay').value||3)*1000));
+}
+function next(auto=false){if(!q.length)return;pos=(pos+1)%q.length;render();if(auto&&playing&&$('mode').value==='quiz')timer=setTimeout(()=>next(true),Math.max(1000,(+$('delay').value||3)*1000))}
+function prev(){if(!q.length)return;pos=(pos-1+q.length)%q.length;render()}
+function stop(){playing=false;clearTimeout(timer);speechSynthesis.cancel();if($('play'))$('play').textContent='▶ 开始连续播放'}
+function start(){if(!cur())return;playing=true;$('play').textContent='▶ 连续播放中'; if($('mode').value==='quiz')timer=setTimeout(()=>next(true),Math.max(1000,(+$('delay').value||3)*1000));else speak(true)}
+$('prev').onclick=()=>{stop();prev()};$('next').onclick=()=>{stop();next(false)};$('speak').onclick=()=>speak(false);
+$('reveal').onclick=()=>{$('box').classList.remove('hidden');$('hint').textContent='答案已显示';speak(false)};
+$('unk').onclick=()=>{let x=cur();if(!x)return;unknown.has(x.id)?unknown.delete(x.id):unknown.add(x.id);localStorage.setItem('poke151_unknown_offline',JSON.stringify([...unknown]));if($('mode').value==='unknown')build();else render()};
+$('play').onclick=start;$('pause').onclick=()=>{stop();$('status').textContent='已暂停。'};
+$('shuffle').onclick=()=>{stop();$('order').value='random';build()};
+['mode','order','start','end'].forEach(k=>$(k).addEventListener('change',build));
+window.onerror=(m)=>{$('status').textContent='网页脚本发生错误：'+m+'。如果是在聊天内置预览，请下载文件后用系统浏览器打开。'};
+build();
+</script>
+</body></html>
